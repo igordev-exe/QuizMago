@@ -1,0 +1,535 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  #quiz-root {
+    font-family: var(--font-sans);
+    background: #1a0e2e;
+    min-height: 520px;
+    border-radius: var(--border-radius-lg);
+    padding: 2rem 1.5rem;
+    color: #e8d5ff;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #quiz-root::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 10% 20%, rgba(120,60,200,0.18) 0%, transparent 55%),
+      radial-gradient(ellipse at 90% 80%, rgba(60,30,120,0.22) 0%, transparent 55%);
+    pointer-events: none;
+  }
+
+  .stars {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: rgba(220,200,255,0.5);
+    border-radius: 50%;
+  }
+
+  .screen { display: none; position: relative; z-index: 1; }
+  .screen.active { display: block; }
+
+  .title-banner {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .title-banner h1 {
+    font-size: 22px;
+    font-weight: 500;
+    color: #d4a8ff;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-shadow: 0 0 20px rgba(180,100,255,0.4);
+  }
+
+  .title-banner p {
+    font-size: 13px;
+    color: #9b7dc0;
+    margin-top: 4px;
+    letter-spacing: 1px;
+  }
+
+  .rune-divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px auto 1.5rem;
+    max-width: 280px;
+  }
+
+  .rune-divider span { font-size: 14px; color: #7a4db5; }
+  .rune-line { flex: 1; height: 1px; background: linear-gradient(to right, transparent, #5a3090, transparent); }
+
+  .intro-text {
+    text-align: center;
+    font-size: 14px;
+    color: #b08ee0;
+    line-height: 1.7;
+    max-width: 460px;
+    margin: 0 auto 2rem;
+  }
+
+  .btn-start {
+    display: block;
+    margin: 0 auto;
+    padding: 12px 36px;
+    background: linear-gradient(135deg, #5a1eb8, #8b44d4);
+    border: 1px solid #9b5ce0;
+    color: #f0e0ff;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-start:hover {
+    background: linear-gradient(135deg, #6b28c9, #9c55e5);
+    transform: translateY(-1px);
+  }
+
+  .gem-icon { font-size: 28px; display: block; margin: 0 auto 0.5rem; text-align: center; }
+
+  .progress-bar-wrap {
+    background: rgba(80,40,140,0.35);
+    border: 1px solid rgba(140,80,220,0.2);
+    border-radius: 99px;
+    height: 6px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(to right, #7b2ff7, #c084fc);
+    transition: width 0.4s ease;
+  }
+
+  .q-counter {
+    font-size: 12px;
+    color: #8060b0;
+    letter-spacing: 1px;
+    text-align: right;
+    margin-bottom: 4px;
+  }
+
+  .q-text {
+    font-size: 16px;
+    color: #e0ccff;
+    line-height: 1.55;
+    min-height: 60px;
+    margin-bottom: 1.25rem;
+    text-align: center;
+  }
+
+  .q-flavor {
+    font-size: 12px;
+    color: #7a55a0;
+    font-style: italic;
+    text-align: center;
+    margin-bottom: 1.25rem;
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .opt-btn {
+    background: rgba(60,25,100,0.55);
+    border: 1px solid rgba(140,80,220,0.3);
+    border-radius: var(--border-radius-md);
+    padding: 12px 14px;
+    color: #caa8f5;
+    font-size: 13px;
+    line-height: 1.4;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.18s;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .opt-btn:hover {
+    background: rgba(100,40,180,0.55);
+    border-color: rgba(180,100,255,0.55);
+    color: #e8d0ff;
+    transform: translateY(-1px);
+  }
+
+  .opt-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    background: rgba(120,50,200,0.5);
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #d4a8ff;
+  }
+
+  .result-card {
+    border: 1px solid rgba(180,100,255,0.35);
+    border-radius: var(--border-radius-lg);
+    background: rgba(50,20,90,0.6);
+    padding: 1.5rem;
+    text-align: center;
+    margin-bottom: 1.25rem;
+  }
+
+  .result-lang-name {
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 0.5rem 0 0.25rem;
+  }
+
+  .result-subtitle {
+    font-size: 13px;
+    color: #9b7dc0;
+    letter-spacing: 0.5px;
+    margin-bottom: 1rem;
+  }
+
+  .result-desc {
+    font-size: 14px;
+    color: #c8a8f0;
+    line-height: 1.65;
+    margin-bottom: 1rem;
+  }
+
+  .result-perks {
+    list-style: none;
+    text-align: left;
+    display: inline-block;
+  }
+
+  .result-perks li {
+    font-size: 13px;
+    color: #b090d8;
+    padding: 3px 0;
+  }
+
+  .result-perks li::before {
+    content: '✦ ';
+    color: #9b5ce0;
+  }
+
+  .score-bars { margin: 1rem 0; }
+
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #9070b8;
+  }
+
+  .score-row .lang-lbl { min-width: 80px; text-align: right; }
+
+  .score-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(80,40,140,0.35);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .score-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.6s ease;
+  }
+
+  .score-num { min-width: 24px; }
+
+  .btn-restart {
+    display: block;
+    margin: 0 auto;
+    padding: 10px 28px;
+    background: transparent;
+    border: 1px solid rgba(140,80,220,0.4);
+    color: #b08ee0;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-restart:hover {
+    background: rgba(80,30,140,0.4);
+    color: #d4b8ff;
+  }
+
+  .btn-cta {
+    display: block;
+    margin: 0.75rem auto 0;
+    padding: 11px 32px;
+    background: linear-gradient(135deg, #5a1eb8, #8b44d4);
+    border: 1px solid #9b5ce0;
+    color: #f0e0ff;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-cta:hover {
+    background: linear-gradient(135deg, #6b28c9, #9c55e5);
+  }
+
+  .lang-py { color: #fbbf24; }
+  .lang-js { color: #60a5fa; }
+  .lang-java { color: #f87171; }
+  .lang-cpp { color: #34d399; }
+
+  .fill-py { background: linear-gradient(to right, #d97706, #fbbf24); }
+  .fill-js { background: linear-gradient(to right, #1d4ed8, #60a5fa); }
+  .fill-java { background: linear-gradient(to right, #b91c1c, #f87171); }
+  .fill-cpp { background: linear-gradient(to right, #047857, #34d399); }
+</style>
+
+<div id="quiz-root">
+  <div class="stars" id="stars-bg"></div>
+
+  <div id="screen-intro" class="screen active">
+    <div class="title-banner">
+      <h1>Oráculo da Linguagem</h1>
+      <div class="rune-divider"><div class="rune-line"></div><span>✦ ✦ ✦</span><div class="rune-line"></div></div>
+      <p>Prisma Cursos — Qual tomo é o seu destino?</p>
+    </div>
+    <p class="intro-text">
+      Aventureiro, o Oráculo irá desvendar qual linguagem de programação ressoa com a sua essência arcana. Responda com sinceridade e os tomos mágicos revelarão seu verdadeiro caminho.
+    </p>
+    <button class="btn-start" onclick="startQuiz()">Iniciar Jornada</button>
+  </div>
+
+  <div id="screen-quiz" class="screen">
+    <div class="title-banner" style="margin-bottom:1rem;">
+      <h1 style="font-size:16px; letter-spacing:1px;">Oráculo da Linguagem</h1>
+    </div>
+    <div class="q-counter" id="q-counter">Pergunta 1 de 7</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="q-flavor" id="q-flavor"></div>
+    <div class="q-text" id="q-text"></div>
+    <div class="options-grid" id="options-grid"></div>
+  </div>
+
+  <div id="screen-result" class="screen">
+    <div class="title-banner">
+      <h1 style="font-size:16px; letter-spacing:1px;">Seu Destino Foi Revelado</h1>
+      <div class="rune-divider"><div class="rune-line"></div><span>✦</span><div class="rune-line"></div></div>
+    </div>
+    <div class="result-card" id="result-card"></div>
+    <div class="score-bars" id="score-bars"></div>
+    <button class="btn-restart" onclick="restartQuiz()">Consultar o Oráculo novamente</button>
+    <button class="btn-cta" onclick="goToCurso()">Ver meu Tomo Mágico ↗</button>
+  </div>
+</div>
+
+<script>
+const LANGS = {
+  python: { name: 'Python', lv: 42, color: '#fbbf24', fillClass: 'fill-py', nameClass: 'lang-py', emoji: '🐍', subtitle: 'Alquimista de Dados — Lv. 42', desc: 'Você tem a alma de um alquimista: curioso, prático e criativo. Python é seu grimório perfeito — poderoso para automação, ciência de dados e inteligência artificial, com uma sintaxe que flui como magia branca.', perks: ['Alquimia de Dados', 'Rituais de Automação', 'Feitiçaria de ML'] },
+  javascript: { name: 'JavaScript', lv: 55, color: '#60a5fa', fillClass: 'fill-js', nameClass: 'lang-js', emoji: '⚡', subtitle: 'Mago da Web Arcana — Lv. 55', desc: 'Você molda o reino digital com a agilidade de um ilusionista. JavaScript anima interfaces, controla navegadores e domina o front e o back-end com uma única linguagem de poder.', perks: ['Manipulação do DOM', 'Feitiçaria Assíncrona', 'Conjuração Reativa'] },
+  java: { name: 'Java', lv: 67, color: '#f87171', fillClass: 'fill-java', nameClass: 'lang-java', emoji: '🔥', subtitle: 'Ferreiro da JVM — Lv. 67', desc: 'Você valoriza estrutura, robustez e poder duradouro. Java é a fornalha ancestral onde grandes sistemas são forjados — de aplicações corporativas a apps mobile com Android.', perks: ['Espíritos de Objetos', 'Estruturas de Primavera', 'Sigilos de Design'] },
+  cpp: { name: 'C / C++', lv: 99, color: '#34d399', fillClass: 'fill-cpp', nameClass: 'lang-cpp', emoji: '⚔️', subtitle: 'Guerreiro da Máquina — Lv. 99', desc: 'Você não teme o abismo. C e C++ concede domínio absoluto sobre a memória e o ferro da máquina — a linguagem dos jogos, sistemas operacionais e do desempenho bruto.', perks: ['Vinculação de Memória', 'Rituais de Ponteiros', 'Comunhão com o SO'] }
+};
+
+const QUESTIONS = [
+  {
+    flavor: 'O oráculo observa sua aura...',
+    text: 'Qual papel você assumiria em uma guilda de aventureiros?',
+    opts: [
+      { label: 'Sábio — analiso dados e prevejo batalhas', scores: { python: 3, java: 1 } },
+      { label: 'Bardo — encanto aliados com interfaces e narrativas', scores: { javascript: 3, python: 1 } },
+      { label: 'Engenheiro — construo fortalezas e sistemas duradouros', scores: { java: 3, cpp: 1 } },
+      { label: 'Guerreiro — lutar no limite da máquina, sem redes de segurança', scores: { cpp: 3, java: 1 } }
+    ]
+  },
+  {
+    flavor: 'As chamas do oráculo revelam sua missão...',
+    text: 'Qual tipo de missão mais te atrai?',
+    opts: [
+      { label: 'Decifrar padrões em vastos pergaminhos de dados', scores: { python: 3, java: 1 } },
+      { label: 'Criar portais mágicos que qualquer pessoa possa usar', scores: { javascript: 3, python: 1 } },
+      { label: 'Erguer arquiteturas que resistam a milênios', scores: { java: 3, cpp: 1 } },
+      { label: 'Criar artefatos que rodam mais rápido que o vento', scores: { cpp: 3, javascript: 1 } }
+    ]
+  },
+  {
+    flavor: 'A névoa arcana sussurra...',
+    text: 'Como você prefere aprender feitiços novos?',
+    opts: [
+      { label: 'Experimentos rápidos — resultados na hora', scores: { python: 3, javascript: 2 } },
+      { label: 'Tutoriais visuais interativos no navegador', scores: { javascript: 3, python: 1 } },
+      { label: 'Projetos grandes e bem estruturados do início', scores: { java: 3, cpp: 1 } },
+      { label: 'Manuais densos — quero entender cada runa', scores: { cpp: 3, java: 1 } }
+    ]
+  },
+  {
+    flavor: 'Os cristais revelam seu destino...',
+    text: 'Qual artefato você sonha em criar?',
+    opts: [
+      { label: 'Um oráculo de IA que prevê o futuro', scores: { python: 3, java: 1 } },
+      { label: 'Um reino digital (site ou app) encantado', scores: { javascript: 3, python: 1 } },
+      { label: 'Um sistema bancário que nunca falha', scores: { java: 3, cpp: 1 } },
+      { label: 'Um jogo épico ou motor de renderização', scores: { cpp: 3, javascript: 1 } }
+    ]
+  },
+  {
+    flavor: 'O espelho arcano reflete sua alma...',
+    text: 'Qual sua relação com erros e bugs?',
+    opts: [
+      { label: 'Prefiro feedback imediato e mensagens claras', scores: { python: 3, javascript: 2 } },
+      { label: 'Gosto de logs coloridos no console do navegador', scores: { javascript: 3 } },
+      { label: 'Quero que o compilador me avise antes de rodar', scores: { java: 3, cpp: 2 } },
+      { label: 'Erros em tempo de execução são parte do desafio', scores: { cpp: 3, java: 1 } }
+    ]
+  },
+  {
+    flavor: 'A esfera mágica interroga seu espírito...',
+    text: 'Como você prefere que seu código seja?',
+    opts: [
+      { label: 'Legível como poesia — menos é mais', scores: { python: 3, javascript: 1 } },
+      { label: 'Flexível e dinâmico — muda com o vento', scores: { javascript: 3, python: 1 } },
+      { label: 'Bem tipado e previsível — segurança acima de tudo', scores: { java: 3, cpp: 2 } },
+      { label: 'Eficiente até o último bit — zero desperdício', scores: { cpp: 3, java: 1 } }
+    ]
+  },
+  {
+    flavor: 'O tomo final aguarda sua escolha...',
+    text: 'Qual mercado de trabalho mais te fascina?',
+    opts: [
+      { label: 'Ciência de dados, IA e automação', scores: { python: 3, java: 1 } },
+      { label: 'Desenvolvimento web e startups', scores: { javascript: 3, python: 1 } },
+      { label: 'Sistemas corporativos e mobile Android', scores: { java: 3, cpp: 1 } },
+      { label: 'Games, sistemas embarcados ou baixo nível', scores: { cpp: 3, java: 1 } }
+    ]
+  }
+];
+
+let scores = {};
+let current = 0;
+const letters = ['A', 'B', 'C', 'D'];
+
+function makeStars() {
+  const el = document.getElementById('stars-bg');
+  for (let i = 0; i < 40; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top = Math.random() * 100 + '%';
+    s.style.opacity = (Math.random() * 0.4 + 0.1).toFixed(2);
+    el.appendChild(s);
+  }
+}
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startQuiz() {
+  scores = { python: 0, javascript: 0, java: 0, cpp: 0 };
+  current = 0;
+  renderQuestion();
+  show('screen-quiz');
+}
+
+function restartQuiz() {
+  show('screen-intro');
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[current];
+  const total = QUESTIONS.length;
+  document.getElementById('q-counter').textContent = `Pergunta ${current + 1} de ${total}`;
+  document.getElementById('progress-fill').style.width = (current / total * 100) + '%';
+  document.getElementById('q-flavor').textContent = q.flavor;
+  document.getElementById('q-text').textContent = q.text;
+
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span>${opt.label}</span>`;
+    btn.onclick = () => choose(opt.scores);
+    grid.appendChild(btn);
+  });
+}
+
+function choose(optScores) {
+  for (const [k, v] of Object.entries(optScores)) { scores[k] = (scores[k] || 0) + v; }
+  current++;
+  if (current >= QUESTIONS.length) { showResult(); } else { renderQuestion(); }
+}
+
+function showResult() {
+  document.getElementById('progress-fill').style.width = '100%';
+  const winner = Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0];
+  const lang = LANGS[winner];
+
+  const card = document.getElementById('result-card');
+  card.innerHTML = `
+    <div class="gem-icon">${lang.emoji}</div>
+    <div class="result-lang-name ${lang.nameClass}">${lang.name}</div>
+    <div class="result-subtitle">${lang.subtitle}</div>
+    <p class="result-desc">${lang.desc}</p>
+    <ul class="result-perks">${lang.perks.map(p => `<li>${p}</li>`).join('')}</ul>
+  `;
+
+  const total = Object.values(scores).reduce((a, b) => a + b, 0) || 1;
+  const barsEl = document.getElementById('score-bars');
+  const order = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  barsEl.innerHTML = order.map(([k, v]) => {
+    const l = LANGS[k];
+    const pct = Math.round(v / total * 100);
+    return `<div class="score-row">
+      <span class="lang-lbl ${l.nameClass}">${l.name}</span>
+      <div class="score-track"><div class="score-fill ${l.fillClass}" style="width:${pct}%"></div></div>
+      <span class="score-num">${pct}%</span>
+    </div>`;
+  }).join('');
+
+  show('screen-result');
+}
+
+function goToCurso() {
+  sendPrompt('Quero saber mais sobre o curso de ' + (document.querySelector('.result-lang-name') || {}).textContent + ' da Prisma Cursos');
+}
+
+makeStars();
+</script>
